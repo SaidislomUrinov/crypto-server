@@ -1,3 +1,4 @@
+import './src/utils/configure.js';
 import express from 'express';
 import http from 'http';
 import {Server} from 'socket.io';
@@ -6,7 +7,6 @@ import fileUpload from 'express-fileupload';
 import mongoose from 'mongoose';
 import {PORT, MONGO_URI} from './src/utils/env.js';
 import router from './src/router.js';
-import './src/utils/configure.js';
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -31,4 +31,3 @@ app.use((req, res, next) => {
 });
 app.use('/api', router)
 server.listen(PORT);
-configure()

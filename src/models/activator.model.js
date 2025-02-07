@@ -1,22 +1,19 @@
 import { model, Schema } from "mongoose";
+import { getNow } from "../utils/date.js";
 
 const schema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    amount: {
+    created: {
         type: Number,
-        required: true
+        default: getNow
     },
-    promocode: {
-        type: Schema.Types.ObjectId,
-        ref: 'Promocode'
-    },
-    claimed: {
+    active: {
         type: Boolean,
-        default: false
+        default: true
     }
 });
 
-export default model('Bonus', schema);
+export default model('Activator', schema);

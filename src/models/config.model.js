@@ -68,6 +68,10 @@ const schema = new Schema({
         type: Number,
         default: 0.01
     },
+    lvlPrice: {
+        type: Number,
+        default: 10
+    }
 });
 
 export default model("Config", schema);

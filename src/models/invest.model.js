@@ -1,18 +1,14 @@
 import { getNow } from "../middlewares/date.js";
 import { model, Schema } from "mongoose";
 const schema = new Schema({
-    element: {
-        type: Schema.Types.ObjectId,
-        ref: 'Element'
-    },
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    lvl: Number,
     amount: Number,
     payAmount: Number,
     profit: Number,
-    tokenProfit: Number,
     created: {
         type: Number,
         default: getNow
