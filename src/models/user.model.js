@@ -129,7 +129,7 @@ schema.methods.claim = async function () {
         return false
     }
 };
-schema.method.lvl = async function () {
+schema.methods.lvl = async function () {
     try {
         const invests = await investModel.aggregate([
             { $match: { user: this._id, status: 'paid' } },

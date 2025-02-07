@@ -4,5 +4,5 @@ import { userAuth } from "../middlewares/auth.js";
 
 export default Router()
     .post('/auth', userController.auth)
-    .post('/activate', userController.activate)
+    .get('/activate', userController.activate)
     .get('/verify', userAuth, userController.verify)

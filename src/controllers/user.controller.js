@@ -20,9 +20,9 @@ export default {
                 user = new userModel({
                     id,
                     email: clearedEmail,
-                    ref1: ref._id || null,
-                    ref2: ref.ref1 || null,
-                    ref3: ref.ref1 || null
+                    ref1: ref?._id || null,
+                    ref2: ref?.ref1 || null,
+                    ref3: ref?.ref1 || null
                 });
                 await user.save();
             }
@@ -63,7 +63,7 @@ export default {
                 msg: "Welcome",
                 access,
                 data: {
-                    _id: user._id,
+                    id: user.id,
                     email: user.email,
                     balance: await user.balance(),
                     dailyProfit: await user.dailyProfit(),
@@ -84,7 +84,7 @@ export default {
         return res.send({
             ok: true,
             data: {
-                _id: user._id,
+                id: user.id,
                 email: user.email,
                 balance: await user.balance(),
                 dailyProfit: await user.dailyProfit(),
