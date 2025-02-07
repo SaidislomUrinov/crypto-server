@@ -9,5 +9,8 @@ export const {
     OXA_MERCHANT_KEY,
     OXA_PAMENT_KEY,
     ADMIN_JWT,
-    USER_JWT
+    USER_JWT,
+    EMAIL_LOGIN,
+    EMAIL_PASSWORD,
+    SMTP,
 } = process.env

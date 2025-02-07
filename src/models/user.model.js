@@ -1,4 +1,4 @@
-import { getNow } from '../middlewares/date.js'
+import { getNow } from '../utils/date.js'
 import { model, Schema } from 'mongoose'
 import bonusModel from './bonus.model.js';
 import claimModel from './claim.model.js';
@@ -6,7 +6,6 @@ import paymentModel from './payment.model.js';
 import investModel from './invest.model.js';
 const schema = new Schema({
     id: Number,
-    name: String,
     active: {
         type: Boolean,
         default: false
@@ -37,7 +36,11 @@ const schema = new Schema({
     created: {
         type: Number,
         default: getNow
-    }
+    },
+    block:{
+        type: Boolean,
+        default: false
+    } 
 });
 schema.methods.balance = async function () {
     try {

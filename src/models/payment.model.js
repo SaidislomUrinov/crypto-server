@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { getNow } from "../middlewares/date.js";
+import { getNow } from "../utils/date.js";
 const schema = new Schema({
     user: {
         type: Schema.Types.ObjectId,

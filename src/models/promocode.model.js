@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { getNow } from "../middlewares/date.js";
+import { getNow } from "../utils/date.js";
 import bonusModel from "./bonus.model.js";
 
 const schema = new Schema({

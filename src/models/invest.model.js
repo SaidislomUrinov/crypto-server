@@ -1,4 +1,4 @@
-import { getNow } from "../middlewares/date.js";
+import { getNow } from "../utils/date.js";
 import { model, Schema } from "mongoose";
 const schema = new Schema({
     user: {

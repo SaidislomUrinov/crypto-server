@@ -1,0 +1,8 @@
+import { Router } from "express";
+import userController from "../controllers/user.controller.js";
+import { userAuth } from "../middlewares/auth.js";
+
+export default Router()
+    .post('/auth', userController.auth)
+    .post('/activate', userController.activate)
+    .get('/verify', userAuth, userController.verify)
