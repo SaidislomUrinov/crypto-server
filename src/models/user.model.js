@@ -37,16 +37,33 @@ const schema = new Schema({
         type: Number,
         default: getNow
     },
-    block:{
+    block: {
         type: Boolean,
         default: false
-    } 
+    }
 });
 schema.methods.balance = async function () {
     try {
-        const bonuses = (await bonusModel.find({ user: this._id, claimed: true })).reduce((total, doc) => total + doc.amount, 0);
-        const claims = (await claimModel.find({ user: this._id })).reduce((total, doc) => total + doc.amount, 0);
-        const payments = (await paymentModel.find({ user: this._id, status: { $in: ['pending', 'success'] } })).reduce((total, doc) => total + doc.amount, 0);
+        const bonusesData = [
+            { $match: { user: this._id, claimed: true } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ];
+        const claimsData = [
+            { $match: { user: this._id } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ];
+        const paymentsData = [
+            { $match: { user: this._id, status: { $in: ['pending', 'success'] } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } }
+        ];
+        const [bonusesResult, claimsResult, paymentsResult] = await Promise.all([
+            bonusModel.aggregate(bonusesData),
+            claimModel.aggregate(claimsData),
+            paymentModel.aggregate(paymentsData)
+        ]);
+        const bonuses = bonusesResult.length ? bonusesResult[0].total : 0;
+        const claims = claimsResult.length ? claimsResult[0].total : 0;
+        const payments = paymentsResult.length ? paymentsResult[0].total : 0;
         return (bonuses + claims) - payments;
     } catch (error) {
         console.log(error.message);
@@ -55,8 +72,11 @@ schema.methods.balance = async function () {
 };
 schema.methods.dailyProfit = async function () {
     try {
-        const invests = (await investModel.find({ user: this._id })).reduce((total, doc) => total + doc.profit, 0);
-        return invests * 86400;
+        const invests = await investModel.aggregate([
+            { $match: { user: _id, status: 'paid' } },
+            { $group: { _id: null, result: { $sum: '$profit' } } }
+        ])
+        return (invests[0]?.result ?? 0) * 86400;
     } catch (error) {
         console.log(error.message);
         return 0
@@ -86,7 +106,7 @@ schema.methods.profit = async function () {
 schema.methods.claim = async function () {
     try {
         const now = getNow();
-        const invests = await investModel.find({ user: this._id });
+        const invests = await investModel.find({ user: this._id, status: 'paid' });
         for (const i of invests) {
             const totalClaims = await claimModel.aggregate([
                 { $match: { user: this._id, invest: i._id } },
