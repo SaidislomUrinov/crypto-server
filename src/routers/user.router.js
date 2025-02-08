@@ -10,3 +10,4 @@ export default Router()
     .get('/configs', userController.configs)
     // 
     .post('/deposit', userAuth, userController.deposit)
+    .post('/claim', userAuth, userController.claim)

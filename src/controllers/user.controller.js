@@ -172,5 +172,23 @@ export default {
                 msg: error.message
             })
         }
+    },
+    claim: async (req, res) => {
+        try {
+            const user = req.user;
+            await user.claim();
+            const balance = await user.balance();
+            return res.send({
+                ok: true,
+                data: {
+                    balance
+                }
+            })
+        } catch (error) {
+            return res.send({
+                ok: false,
+                msg: error.message
+            });
+        }
     }
 }
