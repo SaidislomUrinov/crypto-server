@@ -71,6 +71,10 @@ const schema = new Schema({
     lvlPrice: {
         type: Number,
         default: 10
+    },
+    profit: {
+        type: Number,
+        default: 0.03
     }
 });
 

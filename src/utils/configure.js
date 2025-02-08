@@ -11,12 +11,23 @@ import path from 'path';
         axios.post('https://api.oxapay.com/api/currencies').then(async res => {
             const { data } = res.data;
             try {
-                const currencies = Object.keys(data).map(symbol => ({
-                    title: symbol,
-                    networks: Object.keys(data[symbol].networkList).map(net => net.toLowerCase()),
-                    deposit: true,
-                    withdraw: symbol === 'USDT',
-                }));
+                const currencies = [];
+                Object.keys(data).forEach(symbol => {
+                    if (symbol !== 'BUSD' && symbol !== 'DGB') {
+                        const networks = [];
+                        Object.keys(data[symbol].networkList).forEach(net => {
+                            if (net.toLowerCase() !== 'base') {
+                                networks.push(net.toLowerCase());
+                            }
+                        });
+                        currencies.push({
+                            title: symbol,
+                            networks,
+                            deposit: true,
+                            withdraw: symbol === 'USDT',
+                        })
+                    }
+                });
                 await currencyModel.insertMany(currencies, { ordered: false }).catch(err => {
                     console.error("Error inserting currencies:", err);
                 });

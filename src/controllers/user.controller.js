@@ -5,6 +5,10 @@ import { sendActivator } from '../utils/email.js';
 import { getNow } from '../utils/date.js';
 import jwt from 'jsonwebtoken';
 import { USER_JWT } from '../utils/env.js';
+import currencyModel from '../models/currency.model.js';
+import configModel from '../models/config.model.js';
+import investModel from '../models/invest.model.js';
+import { createWallet } from '../utils/merchant.js';
 export default {
     auth: async (req, res) => {
         try {
@@ -92,5 +96,81 @@ export default {
                 profit: await user.profit(),
             }
         });
+    },
+    currencies: async (_, res) => {
+        try {
+            const currencies = await currencyModel.find().select('title networks deposit withdraw');
+            return res.send({
+                ok: true,
+                data: currencies
+            })
+        } catch (error) {
+            return res.send({
+                ok: false,
+                msg: error.message
+            })
+        }
+    },
+    configs: async (_, res) => {
+        try {
+            const config = await configModel.findOne().select('minWithdraw maxWithdraw withdrawFees withdrawDays autoWithdraw ref1Percent ref2Percent ref3Percent ref1Bonus ref2Bonus ref3Bonus ref1CalimPercent ref2CalimPercent ref3CalimPercent lvlPrice profit');
+            return res.send({
+                ok: true,
+                data: config
+            });
+        } catch (error) {
+            return res.send({
+                ok: false,
+                msg: error.message
+            })
+        }
+    },
+    deposit: async (req, res) => {
+        try {
+            const { currency, network, lvl } = req.body;
+            if (!currency || !network || !lvl) throw new Error("Missing required fields");
+            const user = req.user;
+            const cfg = await configModel.findOne();
+            const investPrice = () => {
+                return cfg.lvlPrice * Math.pow(2, lvl - 1);
+            };
+            const amount = investPrice();
+            const profit = amount * cfg.profit;
+            const resp = await createWallet(network, amount, currency);
+            const { trackId, payAmount, address, QRCode } = resp.data;
+            const investData = {
+                user: user._id,
+                profit: profit / 86400,
+                amount,
+                currency,
+                network,
+                lvl: lvl - await user.lvl(),
+                wallet: address,
+                trackId,
+                payAmount,
+                qr: QRCode
+            };
+            const invest = new investModel(investData);
+            await invest.save();
+            return res.send({
+                ok: true,
+                msg: "Cheque",
+                data: {
+                    network: invest.network,
+                    wallet: invest.wallet,
+                    qr: invest.qr,
+                    currency: invest.currency,
+                    payAmount: invest.payAmount,
+                    amount: invest.amount,
+                    unix: invest.created,
+                    lvl 
+                }
+            });
+        } catch (error) {
+            return res.send({
+                ok: false,
+                msg: error.message
+            })
+        }
     }
 }
