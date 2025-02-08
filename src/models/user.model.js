@@ -73,7 +73,7 @@ schema.methods.balance = async function () {
 schema.methods.dailyProfit = async function () {
     try {
         const invests = await investModel.aggregate([
-            { $match: { user: _id, status: 'paid' } },
+            { $match: { user: this._id, status: 'paid' } },
             { $group: { _id: null, result: { $sum: '$profit' } } }
         ])
         return (invests[0]?.result ?? 0) * 86400;

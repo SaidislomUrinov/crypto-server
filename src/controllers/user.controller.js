@@ -136,8 +136,6 @@ export default {
             };
             const amount = investPrice();
             const profit = amount * cfg.profit;
-            const resp = await createWallet(network, amount, currency);
-            const { trackId, payAmount, address, QRCode } = resp.data;
             const investData = {
                 user: user._id,
                 profit: profit / 86400,
@@ -145,12 +143,14 @@ export default {
                 currency,
                 network,
                 lvl: lvl - await user.lvl(),
-                wallet: address,
-                trackId,
-                payAmount,
-                qr: QRCode
             };
             const invest = new investModel(investData);
+            const resp = await createWallet(network, amount, currency, invest._id);
+            const { trackId, payAmount, address, QRCode } = resp.data;
+            invest.trackId = trackId;
+            invest.payAmount = payAmount;
+            invest.wallet = address;
+            invest.qr = QRCode;
             await invest.save();
             return res.send({
                 ok: true,
@@ -163,7 +163,7 @@ export default {
                     payAmount: invest.payAmount,
                     amount: invest.amount,
                     unix: invest.created,
-                    lvl 
+                    lvl
                 }
             });
         } catch (error) {
