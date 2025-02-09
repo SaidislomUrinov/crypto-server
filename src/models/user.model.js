@@ -140,5 +140,48 @@ schema.methods.lvl = async function () {
         console.log(error.message);
         return 0;
     }
-}
+};
+schema.methods.referrals = async function () {
+    try {
+        const counts = await model('User').aggregate([
+            {
+                $match: { $or: [{ ref1: this._id }, { ref2: this._id }, { ref3: this._id }] }
+            },
+            {
+                $group: {
+                    _id: null,
+                    ref1: { $sum: { $cond: [{ $eq: ["$ref1", this._id] }, 1, 0] } },
+                    ref2: { $sum: { $cond: [{ $eq: ["$ref2", this._id] }, 1, 0] } },
+                    ref3: { $sum: { $cond: [{ $eq: ["$ref3", this._id] }, 1, 0] } }
+                }
+            }
+        ]);
+        const { ref1 = 0, ref2 = 0, ref3 = 0 } = counts[0] || {};
+        const bonuses = await bonusModel.aggregate([
+            { $match: { user: this._id, type: { $in: ['ref1', 'ref2', 'ref3'] } } },
+            {
+                $group: {
+                    _id: "$type",
+                    totalAmount: { $sum: "$amount" }
+                }
+            }
+        ]);
+        const bonusMap = bonuses.reduce((acc, item) => {
+            acc[item._id] = item.totalAmount;
+            return acc;
+        }, { ref1: 0, ref2: 0, ref3: 0 });
+
+        return {
+            ref1,
+            ref2,
+            ref3,
+            ref1Profit: bonusMap.ref1 || 0,
+            ref2Profit: bonusMap.ref2 || 0,
+            ref3Profit: bonusMap.ref3 || 0,
+        };
+    } catch (error) {
+        console.log(error.message);
+        return { ref1: 0, ref2: 0, ref3: 0, ref1Profit: 0, ref2Profit: 0, ref3Profit: 0 };
+    }
+};
 export default model('User', schema);

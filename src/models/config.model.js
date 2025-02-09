@@ -56,18 +56,6 @@ const schema = new Schema({
         type: Number,
         default: 0.1
     },
-    ref1CalimPercent: {
-        type: Number,
-        default: 0.05
-    },
-    ref2CalimPercent: {
-        type: Number,
-        default: 0.03
-    },
-    ref3CalimPercent: {
-        type: Number,
-        default: 0.01
-    },
     lvlPrice: {
         type: Number,
         default: 10

@@ -5,6 +5,11 @@ const schema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    type: {
+        type: String,
+        enum: ['ref1', 'ref2', 'ref3', 'bonus'],
+        default: 'bonus'
+    },
     amount: {
         type: Number,
         required: true

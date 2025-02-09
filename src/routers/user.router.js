@@ -11,3 +11,4 @@ export default Router()
     // 
     .post('/deposit', userAuth, userController.deposit)
     .post('/claim', userAuth, userController.claim)
+    .get('/referrals', userAuth, userController.referrals)

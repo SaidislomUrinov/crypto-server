@@ -113,7 +113,7 @@ export default {
     },
     configs: async (_, res) => {
         try {
-            const config = await configModel.findOne().select('minWithdraw maxWithdraw withdrawFees withdrawDays autoWithdraw ref1Percent ref2Percent ref3Percent ref1Bonus ref2Bonus ref3Bonus ref1CalimPercent ref2CalimPercent ref3CalimPercent lvlPrice profit');
+            const config = await configModel.findOne().select('minWithdraw maxWithdraw withdrawFees withdrawDays autoWithdraw ref1Percent ref2Percent ref3Percent ref1Bonus ref2Bonus ref3Bonus lvlPrice profit');
             return res.send({
                 ok: true,
                 data: config
@@ -183,6 +183,20 @@ export default {
                 data: {
                     balance
                 }
+            })
+        } catch (error) {
+            return res.send({
+                ok: false,
+                msg: error.message
+            });
+        }
+    },
+    referrals: async (req,res)=>{
+        try {
+            const referrals = await req.user.referrals();
+            return res.send({
+                ok: true,
+                data: referrals
             })
         } catch (error) {
             return res.send({
