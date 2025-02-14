@@ -9,6 +9,7 @@ import currencyModel from '../models/currency.model.js';
 import configModel from '../models/config.model.js';
 import investModel from '../models/invest.model.js';
 import { createWallet } from '../utils/merchant.js';
+import paymentModel from '../models/payment.model.js';
 export default {
     auth: async (req, res) => {
         try {
@@ -144,6 +145,7 @@ export default {
                 network,
                 lvl: lvl - await user.lvl(),
             };
+            await investModel.updateMany({ status: 'active', user: user._id }, { $set: { status: 'expired' } });
             const invest = new investModel(investData);
             const resp = await createWallet(network, amount, currency, invest._id);
             const { trackId, payAmount, address, QRCode } = resp.data;
@@ -191,7 +193,7 @@ export default {
             });
         }
     },
-    referrals: async (req,res)=>{
+    referrals: async (req, res) => {
         try {
             const referrals = await req.user.referrals();
             return res.send({
@@ -203,6 +205,39 @@ export default {
                 ok: false,
                 msg: error.message
             });
+        }
+    },
+    transactions: async (req, res) => {
+        try {
+            const user = req.user;
+            const lvl = await user.lvl();
+            const invests = await investModel.find({ status: { $in: ['paid', 'active'] }, user: user._id }).sort({ created: -1 }).select('lvl wallet lvl amount payAmount created network currency qr wallet status');
+            const payments = await paymentModel.find({ status: { $in: ['pending', 'success'] }, user: user._id }).sort({ created: -1 }).select('network currency address status amount created');
+            const data = [];
+            invests.forEach((inv) => {
+                data.push({
+                    ...inv.toObject(),
+                    lvl: inv.lvl + lvl,
+                    status: inv.status,
+                    action: 'invest'
+                })
+            });
+            payments.forEach((p) => {
+                data.push({
+                    ...p.toObject(),
+                    status: p.status,
+                    action: 'payment'
+                });
+            });
+            return res.send({
+                ok: true,
+                data: [...data].sort((a, b) => b.created - a.created)
+            })
+        } catch (error) {
+            return res.send({
+                ok: false,
+                msg: error.message
+            })
         }
     }
 }
